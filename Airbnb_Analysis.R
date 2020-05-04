@@ -4,12 +4,25 @@ install.packages("ggplot2")
 install.packages("wordcloud")
 install.packages("ggwordcloud")
 install.packages("forcats")
+install.packages("fastDummies")
+install.packages("tm")
+install.packages("SnowballC")
+install.packages("wordcloud") 
+install.packages("RColorBrewer")
+install.packages("qdapTools")
+
 library(Amelia)
 library(dplyr)
 library(ggplot2)
 library(wordcloud)
 library(ggwordcloud)
 library(forcats)
+library(fastDummies)
+library(tm)
+library(SnowballC)
+library(wordcloud)
+library(RColorBrewer)
+library(qdapTools)
 # Detailed listings data for New York
 listing_data <- read.csv("./data/listings-summary.csv")
 
@@ -507,8 +520,9 @@ findAssocs(dtm, terms = "store", corlimit = 0.1)
 # some interesting findings here, found amenities like grocery, park, subway etc,.
 
 
-
+#
 # 4. Use foursquare_api.R to get information about near by amenities like parks, subways, restaurants etc,.
+#
 
 write.csv(initial_df, "./data/cleaned_listings_data.csv")
 
@@ -516,3 +530,51 @@ write.csv(initial_df, "./data/cleaned_listings_data.csv")
 
 # final dataset below
 final_data <- read.csv("./data/final_data.csv")
+
+
+#
+# 5. Feature Engineering
+#
+
+
+# creating dummies for categorical variables
+
+
+#
+# Feature engineering - Do Hot one encoding for amenities
+#
+
+
+# creating dummies for amenities
+
+final_data$amenities <- stringr::str_sub(final_data$amenities, 2, -2)
+final_data$amenities <- gsub('"', '',final_data$amenities)
+amenities_list <- stringr::str_split(tolower(final_data$amenities)
+                                     ,",")
+final_data$amenities <- gsub("[^[:alnum:]]", "_", final_data$amenities)
+amenities_list <-  sapply(amenities_list, function(d){
+  return(gsub("[^[:alnum:]]", "_", d))
+})
+lev <- unique(unlist(amenities_list)) # list of all unique amenities
+dummies <- do.call(rbind, lapply(amenities_list, function(x) table(factor(x, levels=lev))))
+str(dummies)
+
+# creating a calculated variable , amenity count
+dummies$amenity_count <- base::apply(dummies, MARGIN = 1, sum)
+
+final_data <- cbind(final_data, dummies)
+
+# creating dummies for other categorical variables
+
+final_data <- dummy_cols(final_data, select_columns = c("cancellation_policy", "property_type", "neighbourhood_cleansed", "bed_type", "neighbourhood_group_cleansed"))
+
+final_data$neighbourhood_cleansed <- NULL;
+final_data$neighbourhood_group_cleansed <- NULL;
+final_data$is_location_exact <- NULL;
+final_data$property_type <- NULL;
+final_data$room_type <- NULL;
+final_data$bed_type <- NULL;
+final_data$cancellation_policy <- NULL;
+final_data$transit <- NULL;
+final_data$price_per_person <- NULL;
+final_data$amenities <- NULL;
