@@ -578,3 +578,84 @@ final_data$cancellation_policy <- NULL;
 final_data$transit <- NULL;
 final_data$price_per_person <- NULL;
 final_data$amenities <- NULL;
+
+
+
+# 
+# 6. Modeling
+# 
+
+
+XGBOOST 
+
+# default parameters
+
+h2o.init(nthreads = 15, max_mem_size = "10g")
+
+trainIndex <- createDataPartition(
+  y = final_data$price,
+  p = 0.8,
+  list = FALSE) 
+
+df_train <- as.h2o(final_data[ trainIndex,])
+df_test  <- as.h2o(final_data[-trainIndex,])
+
+y <- "price"
+x <- setdiff(names(final_data), y)
+nfolds <- 5
+
+# Regression Methods
+
+glm <- h2o.glm(
+  family= "gaussian", 
+  x= x, 
+  y= y, 
+  remove_collinear_columns = TRUE,
+  training_frame=df_train,
+  lambda = 0, 
+  compute_p_values = TRUE)
+
+glm.lasso <- h2o.glm(
+  family= "gaussian", 
+  x= x, 
+  y= y, 
+  remove_collinear_columns = TRUE,
+  training_frame=df_train,
+  lambda = 0.25,
+  alpha = 1)
+
+glm.ridge <- h2o.glm(
+  family= "gaussian", 
+  x= x, 
+  y= y, 
+  remove_collinear_columns = TRUE,
+  training_frame=df_train,
+  alpha = 0,
+  lambda = 0.75)
+
+xgb_model <- h2o.xgboost(x = x,
+                         y = y,
+                         training_frame = df_train,
+                         validation_frame = df_test,
+                         ntrees = 910,
+                         max_depth = 3,
+                         min_rows = 2,
+                         learn_rate = 0.2,
+                         nfolds = 10,
+                         fold_assignment = "Modulo",
+                         keep_cross_validation_predictions = TRUE,
+                         seed = 1)
+
+
+var_importance <- h2o.varimp(xgb_model)
+View(var_importance$variable)
+
+
+h2o.r2(gbm, valid = TRUE)
+h2o.r2(glm.lasso, valid = TRUE)
+h2o.r2(glm.ridge, valid = TRUE)
+h2o.r2(xgb_model, valid = TRUE)
+
+h2o.saveModel(xgb_model)
+
+
