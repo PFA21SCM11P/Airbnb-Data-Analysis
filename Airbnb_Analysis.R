@@ -460,3 +460,59 @@ categories %>%
   mutate(Name = reorder(Name,Count)) -> nonSuperHostAmenities
 
 setdiff(superHostAmenities, nonSuperHostAmenities)
+
+
+# EDA - Airbnb Reviews Dataset
+
+reviews_data <- read.csv("./data/reviews-summary.csv", nrows = 100000)
+
+docs <- Corpus(VectorSource(reviews_data$comments))
+
+toSpace <- content_transformer(function (x , pattern ) gsub(pattern, " ", x))
+docs <- tm_map(docs, toSpace, "/")
+docs <- tm_map(docs, toSpace, "@")
+docs <- tm_map(docs, toSpace, "\\|")
+docs <- tm_map(docs, content_transformer(tolower))
+# Remove numbers
+docs <- tm_map(docs, removeNumbers)
+# Remove english common stopwords
+docs <- tm_map(docs, removeWords, stopwords("english"))
+# Remove punctuations
+docs <- tm_map(docs, removePunctuation)
+# Eliminate extra white spaces
+docs <- tm_map(docs, stripWhitespace)
+
+dtm <- TermDocumentMatrix(docs)
+m <- as.matrix(dtm)
+v <- sort(rowSums(m),decreasing=TRUE)
+d <- data.frame(word = names(v),freq=v)
+
+set.seed(1234)
+wordcloud(words = d$word, freq = d$freq, min.freq = 1,
+          max.words=200, random.order=FALSE, rot.per=0.35, 
+          colors=brewer.pal(8, "Dark2"))
+
+# find word associations
+
+findAssocs(dtm, terms = "like", corlimit = 0.1)
+findAssocs(dtm, terms = "good", corlimit = 0.1)
+findAssocs(dtm, terms = "near", corlimit = 0.1)
+findAssocs(dtm, terms = "great", corlimit = 0.1)
+findAssocs(dtm, terms = "close", corlimit = 0.1)
+asc <- findAssocs(dtm, terms = "around", corlimit = 0.1)
+findAssocs(dtm, terms = "place", corlimit = 0.1)
+findAssocs(dtm, terms = "transit", corlimit = 0.1)
+findAssocs(dtm, terms = "store", corlimit = 0.1)
+
+# some interesting findings here, found amenities like grocery, park, subway etc,.
+
+
+
+# 4. Use foursquare_api.R to get information about near by amenities like parks, subways, restaurants etc,.
+
+write.csv(initial_df, "./data/cleaned_listings_data.csv")
+
+# run Foursquare_API.r on cleaned_listings_data.csv file
+
+# final dataset below
+final_data <- read.csv("./data/final_data.csv")
