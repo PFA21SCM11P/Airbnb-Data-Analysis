@@ -1,3 +1,5 @@
 # Airbnb-Data-Analysis
-
-Test commit
+    
+    ├── data                    # Datasets
+    ├── models                  # Pre-trained models of xgboost
+    └── README.md
