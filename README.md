@@ -2,4 +2,7 @@
     
     ├── data                    # Datasets
     ├── models                  # Pre-trained models of xgboost
-    └── README.md
+    ├── Airbnb_Analysis.R       # Data cleaning Code & EDA code
+    ├── Foursquare_API.R        # Foursquare API code to fetch nearby venue information for each listing
+    ├── Models.R                # Model training & Hyper parameter tuning code
+    └── README.md 
