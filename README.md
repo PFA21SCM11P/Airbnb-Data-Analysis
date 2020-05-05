@@ -1,7 +1,6 @@
-Analyze Airbnb Listings in the city of New York and make recommendations on Amenities
-
-
 # Airbnb-Data-Analysis
+
+Analyze Airbnb Listings in the city of New York and make recommendations on Amenities
     
     ├── data                    # Datasets
     ├── models                  # Pre-trained models of xgboost
