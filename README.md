@@ -7,7 +7,7 @@
     ├── Models.R                # Model training & Hyper parameter tuning code
     └── README.md 
 
-### Source files
+### Datasets
 
 1. Please download the listings-summary.csv & reviews.csv datasets from http://insideairbnb.com/get-the-data.html
 2. unzip and copy into data folder
