@@ -1,3 +1,6 @@
+Analyze Airbnb Listings in the city of New York and make recommendations on Amenities
+
+
 # Airbnb-Data-Analysis
     
     ├── data                    # Datasets
